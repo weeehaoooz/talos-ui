@@ -4,11 +4,14 @@
     [currentDate]="currentDate()"
     [view]="view()"
     [showNewEventButton]="allowEventCreation()"
+    [fullscreen]="fullscreen()"
+    [showFullscreenToggle]="allowFullscreen()"
     (prev)="onPrev()"
     (next)="onNext()"
     (today)="onToday()"
     (viewChange)="onViewChange($event)"
     (newEvent)="onNewEventClick()"
+    (fullscreenToggle)="toggleFullscreen()"
   />
 
   <!-- Active Calendar View Body -->

@@ -2,18 +2,17 @@ import {
   Component,
   Directive,
   ElementRef,
-  HostListener,
   DestroyRef,
   inject,
   input,
-  Signal,
-  effect,
-  Injector
+  Injector,
+  OnInit
 } from '@angular/core';
+import { FocusMonitor, FocusOrigin } from '@angular/cdk/a11y';
 import { Overlay, OverlayRef, PositionStrategy } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 
-export type TooltipPosition = 'top' | 'bottom' | 'left' | 'right' | 'auto';
+export type TooltipPosition = 'top' | 'left' | 'right' | 'bottom' | 'auto';
 
 @Component({
   selector: 'talos-tooltip-content',
@@ -32,16 +31,16 @@ export class TalosTooltipComponent {
   host: {
     '(mouseenter)': 'show()',
     '(mouseleave)': 'hide()',
-    '(focus)': 'show()',
-    '(blur)': 'hide()',
+    '(click)': 'hide()',
     '(keydown.escape)': 'hide()'
   }
 })
-export class TalosTooltipDirective {
+export class TalosTooltipDirective implements OnInit {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly overlay = inject(Overlay);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
+  private readonly focusMonitor = inject(FocusMonitor);
 
   readonly tooltip = input<string>('', { alias: 'talosTooltip' });
   readonly tooltipContent = input<string>('', { alias: 'tooltip' });
@@ -50,8 +49,19 @@ export class TalosTooltipDirective {
 
   private overlayRef: OverlayRef | null = null;
 
-  constructor() {
-    this.destroyRef.onDestroy(() => this.hide());
+  ngOnInit(): void {
+    this.focusMonitor.monitor(this.elementRef).subscribe((origin: FocusOrigin) => {
+      if (origin === 'keyboard') {
+        this.show();
+      } else if (!origin) {
+        this.hide();
+      }
+    });
+
+    this.destroyRef.onDestroy(() => {
+      this.focusMonitor.stopMonitoring(this.elementRef);
+      this.hide();
+    });
   }
 
   get tooltipText(): string {

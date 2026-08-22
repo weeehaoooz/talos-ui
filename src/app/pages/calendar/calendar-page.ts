@@ -12,13 +12,20 @@ import {
   CalendarEvent,
   CalendarViewMode,
   CalendarDateSelectEvent,
+  CalendarSize,
+  CalendarEventClickAction,
 } from '@daedal-dev/talos-calendar';
+import { TalosButtonDirective } from '@daedal-dev/talos-ui/button/button';
 import {
   LucideCalendar,
   LucideClock,
   LucideFilter,
   LucideSparkles,
-  LucideCheckCircle2,
+  LucideMaximize2,
+  LucideMinimize2,
+  LucideEye,
+  LucidePencil,
+  LucideSettings,
 } from '@lucide/angular';
 
 @Component({
@@ -27,11 +34,16 @@ import {
     CommonModule,
     FormsModule,
     TalosCalendarComponent,
+    TalosButtonDirective,
     LucideCalendar,
     LucideClock,
     LucideFilter,
     LucideSparkles,
-    LucideCheckCircle2,
+    LucideMaximize2,
+    LucideMinimize2,
+    LucideEye,
+    LucidePencil,
+    LucideSettings,
   ],
   templateUrl: './calendar-page.html',
   styleUrls: ['./calendar-page.scss'],
@@ -40,6 +52,23 @@ export class CalendarPageComponent {
   readonly currentView = signal<CalendarViewMode>('month');
   readonly activeDate = signal<Date>(new Date());
   readonly selectedCategory = signal<string>('all');
+  readonly calendarSize = signal<CalendarSize>('md');
+  readonly isFullscreen = signal<boolean>(false);
+
+  readonly eventClickAction = signal<CalendarEventClickAction>('preview');
+  readonly allowEventEdit = signal<boolean>(true);
+
+  readonly eventClickActionOptions: { id: CalendarEventClickAction; label: string; desc: string }[] = [
+    { id: 'preview', label: 'Preview Mode', desc: 'Opens details preview with extensible ng-content & edit button' },
+    { id: 'edit', label: 'Direct Edit', desc: 'Opens full form directly in edit mode' },
+    { id: 'none', label: 'None (Event only)', desc: 'Emits eventClick output without dialog' },
+  ];
+
+  readonly sizeOptions: { id: CalendarSize; label: string; desc: string }[] = [
+    { id: 'sm', label: 'Compact (SM)', desc: 'Dashboard & widgets' },
+    { id: 'md', label: 'Default (MD)', desc: 'Standard layout' },
+    { id: 'lg', label: 'Spacious (LG)', desc: 'Large screens' },
+  ];
 
   // Sample initial events spanning multiple days and timed slots
   readonly allEvents = signal<CalendarEvent[]>([
@@ -149,5 +178,13 @@ export class CalendarPageComponent {
 
   onEventDeleted(id: string) {
     this.allEvents.update((list) => list.filter((item) => item.id !== id));
+  }
+
+  onSizeChange(size: CalendarSize) {
+    this.calendarSize.set(size);
+  }
+
+  toggleFullscreen() {
+    this.isFullscreen.update((f) => !f);
   }
 }

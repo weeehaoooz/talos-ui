@@ -1,0 +1,193 @@
+@use '../../styles/calendar' as cal;
+
+:host {
+  display: block;
+}
+
+.preview-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.25rem 0 0.5rem;
+}
+
+.preview-hero-section {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+  padding: 0.875rem 1.125rem;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--preview-accent, #2563eb) 10%, var(--talos-card-bg, #ffffff)) 0%,
+    var(--talos-bg-subtle, #f8fafc) 100%
+  );
+  border: 1px solid color-mix(in srgb, var(--preview-accent, #2563eb) 26%, var(--talos-border-color, #e2e8f0));
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--preview-accent, #2563eb) 18%, transparent);
+
+  .preview-accent-indicator {
+    width: 5px;
+    border-radius: 9999px;
+    flex-shrink: 0;
+    background-color: var(--preview-accent, #2563eb);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--preview-accent, #2563eb) 50%, transparent);
+  }
+
+  .preview-hero-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .preview-meta-badges {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .preview-color-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--talos-text-color, #1e293b);
+    background-color: var(--talos-card-bg, #ffffff);
+    padding: 0.15rem 0.55rem;
+    border-radius: 9999px;
+    border: 1px solid color-mix(in srgb, var(--preview-accent, #2563eb) 30%, var(--talos-border-color, #e2e8f0));
+
+    .color-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 9999px;
+      flex-shrink: 0;
+      box-shadow: 0 0 4px color-mix(in srgb, var(--preview-accent, #2563eb) 60%, transparent);
+    }
+  }
+
+  .preview-category-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--talos-text-muted, #64748b);
+    background-color: var(--talos-card-bg, #ffffff);
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
+    border: 1px solid var(--talos-border-color, #e2e8f0);
+
+    .badge-icon {
+      color: var(--talos-text-muted, #64748b);
+    }
+  }
+
+  .preview-allday-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--preview-accent, #2563eb);
+    background-color: color-mix(in srgb, var(--preview-accent, #2563eb) 12%, transparent);
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
+  }
+
+  .preview-event-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--talos-text-color, #1e293b);
+    line-height: 1.4;
+    word-break: break-word;
+  }
+}
+
+.preview-details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 0 0.25rem;
+}
+
+.preview-detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+
+  .detail-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    background-color: var(--talos-bg-subtle, #f1f5f9);
+    color: var(--talos-text-muted, #64748b);
+    border: 1px solid var(--talos-border-subtle, rgba(226, 232, 240, 0.6));
+    flex-shrink: 0;
+  }
+
+  .detail-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    flex: 1;
+    min-width: 0;
+
+    .detail-label {
+      font-size: 0.725rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--talos-text-muted, #94a3b8);
+    }
+
+    .detail-value {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--talos-text-color, #334155);
+      line-height: 1.4;
+    }
+
+    .detail-description {
+      margin: 0.15rem 0 0;
+      font-size: 0.875rem;
+      color: var(--talos-text-color, #334155);
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  }
+}
+
+.preview-extension-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.preview-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--talos-border-color, #e2e8f0);
+
+  .right-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+}

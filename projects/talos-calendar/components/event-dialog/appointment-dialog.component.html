@@ -1,151 +1,54 @@
-<talos-dialog-header [title]="isEdit ? 'Edit Event' : 'New Event / Appointment'" />
+<talos-dialog-header [title]="isCreate() ? 'New Event / Appointment' : isEdit() ? 'Edit Event' : 'Event Details'">
+  @if (isPreview() && activeEvent()) {
+  <div talos-dialog-header-actions class="preview-header-actions">
+    @if (canEdit()) {
+    <button talosButton variant="ghost" [iconOnly]="true" size="sm" type="button" class="header-action-btn"
+      talosTooltip="Edit Event" aria-label="Edit Event" (click)="switchToEdit()">
+      <svg lucidePencil [size]="16"></svg>
+    </button>
+    }
+    @if (canDelete()) {
+    <button talosButton variant="ghost" [iconOnly]="true" size="sm" type="button" class="header-action-btn delete-btn"
+      talosTooltip="Delete Event" aria-label="Delete Event" (click)="triggerDelete()">
+      <svg lucideTrash2 [size]="16"></svg>
+    </button>
+    }
+  </div>
+  }
+</talos-dialog-header>
 
 <talos-dialog-content>
-  <form [formGroup]="form" class="appointment-form">
-    <!-- Event Title -->
-    <talos-form-field label="Event Title" [required]="true">
-      <input
-        talosInput
-        formControlName="title"
-        placeholder="e.g. Design Sync, Annual Tech Summit..."
-        autofocus
-      />
-    </talos-form-field>
-
-    <!-- All-Day Toggle -->
-    <div class="toggle-row">
-      <talos-slide-toggle formControlName="allDay">
-        All-day or Multi-day Event
-      </talos-slide-toggle>
-    </div>
-
-    <!-- Date / Time Grid -->
-    <div class="datetime-grid">
-      <!-- Start Date & Time -->
-      <div class="datetime-column">
-        <talos-form-field label="Starts" [required]="true">
-          <input
-            talosInput
-            type="date"
-            formControlName="startDate"
-          />
-        </talos-form-field>
-
-        @if (!form.value.allDay) {
-          <talos-form-field label="Start Time">
-            <input
-              talosInput
-              type="time"
-              formControlName="startTime"
-            />
-          </talos-form-field>
-        }
-      </div>
-
-      <!-- End Date & Time -->
-      <div class="datetime-column">
-        <talos-form-field label="Ends" [required]="true">
-          <input
-            talosInput
-            type="date"
-            formControlName="endDate"
-          />
-        </talos-form-field>
-
-        @if (!form.value.allDay) {
-          <talos-form-field label="End Time">
-            <input
-              talosInput
-              type="time"
-              formControlName="endTime"
-            />
-          </talos-form-field>
-        }
-      </div>
-    </div>
-
-    <!-- Category & Color Picker -->
-    <div class="category-and-color-row">
-      <div class="category-field">
-        <talos-form-field label="Category">
-          <talos-select-input formControlName="category">
-            @for (cat of categories; track cat) {
-              <talos-option [value]="cat" [label]="cat">{{ cat }}</talos-option>
-            }
-          </talos-select-input>
-        </talos-form-field>
-      </div>
-
-      <div class="color-picker-group">
-        <span class="field-sublabel">Event Color</span>
-        <div class="color-swatches">
-          @for (color of colorOptions; track color.id) {
-            <button
-              type="button"
-              class="color-swatch"
-              [class.is-selected]="selectedColor() === color.id"
-              [style.background-color]="color.hex"
-              [title]="color.label"
-              (click)="onSelectColor(color.id)"
-            ></button>
-          }
-        </div>
-      </div>
-    </div>
-
-    <!-- Location -->
-    <talos-form-field label="Location (Optional)">
-      <input
-        talosInput
-        formControlName="location"
-        placeholder="e.g. Conference Room A, Google Meet, City Hall..."
-      />
-    </talos-form-field>
-
-    <!-- Description -->
-    <talos-form-field label="Description (Optional)">
-      <textarea
-        talosInput
-        formControlName="description"
-        rows="3"
-        placeholder="Add details, agenda, notes, or links..."
-      ></textarea>
-    </talos-form-field>
-  </form>
+  @if (isPreview() && activeEvent()) {
+  <talos-appointment-preview [event]="activeEvent()!" [allowEdit]="canEdit()" [allowDelete]="canDelete()"
+    [showActions]="false" (edit)="switchToEdit()" (delete)="onDelete($event)" (close)="onCancel()">
+    <ng-content select="[previewExtension], [previewContent], [dialogPreview]"></ng-content>
+    <ng-content></ng-content>
+  </talos-appointment-preview>
+  } @else {
+  <talos-appointment-form [event]="activeEvent()" [dateSelection]="data?.dateSelection"
+    [mode]="isCreate() ? 'create' : 'edit'" [allowDelete]="canDelete()" [showActions]="false" (save)="onSave($event)"
+    (delete)="onDelete($event)" (cancel)="onCancel()" />
+  }
 </talos-dialog-content>
 
+@if (!isPreview()) {
 <talos-dialog-footer>
   <div class="dialog-footer-actions">
-    @if (isEdit) {
-      <button
-        talosButton
-        variant="danger"
-        type="button"
-        (click)="onDelete()"
-      >
-        <svg lucideTrash2 [size]="15"></svg>
-        <span>Delete</span>
-      </button>
+    @if (canDelete() && isEdit()) {
+    <button talosButton variant="danger" type="button" (click)="triggerDelete()">
+      <svg lucideTrash2 [size]="16"></svg>
+      <span>Delete</span>
+    </button>
     }
 
     <div class="right-actions">
-      <button
-        talosButton
-        variant="outline"
-        type="button"
-        (click)="onCancel()"
-      >
+      <button talosButton variant="outline" type="button" (click)="onCancel()">
         Cancel
       </button>
-      <button
-        talosButton
-        variant="primary"
-        type="button"
-        [disabled]="form.invalid"
-        (click)="onSave()"
-      >
-        {{ isEdit ? 'Save Changes' : 'Create Event' }}
+      <button talosButton variant="primary" type="button" (click)="submitForm()">
+        {{ isEdit() ? 'Save Changes' : 'Create Event' }}
       </button>
     </div>
   </div>
 </talos-dialog-footer>
+}

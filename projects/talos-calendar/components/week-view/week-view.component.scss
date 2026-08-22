@@ -6,6 +6,68 @@
   background: var(--talos-cal-bg, #ffffff);
 }
 
+:host-context(.talos-calendar-root.is-fullscreen),
+:host-context(.talos-calendar-root.size-full) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+
+  .week-view-container {
+    height: 100%;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .time-grid-scroll-area {
+    max-height: none;
+    height: 100%;
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+:host-context(.talos-calendar-root.size-sm) {
+  .day-col-header {
+    padding: 0.375rem 0.25rem;
+
+    .day-badge {
+      width: 22px;
+      height: 22px;
+      font-size: 0.8125rem;
+    }
+  }
+
+  .time-grid-scroll-area {
+    max-height: 420px;
+  }
+
+  .time-grid-body {
+    min-height: 960px;
+  }
+}
+
+:host-context(.talos-calendar-root.size-lg) {
+  .day-col-header {
+    padding: 0.75rem 0.5rem;
+
+    .day-badge {
+      width: 32px;
+      height: 32px;
+      font-size: 1.125rem;
+    }
+  }
+
+  .time-grid-scroll-area {
+    max-height: 750px;
+  }
+
+  .time-grid-body {
+    min-height: 1440px;
+  }
+}
+
 .week-view-container {
   display: flex;
   flex-direction: column;

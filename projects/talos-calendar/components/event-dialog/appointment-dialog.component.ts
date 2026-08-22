@@ -1,28 +1,36 @@
-import { Component, inject, signal } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  computed,
+  input,
+  output,
+  viewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { format, parse, isValid, addHours } from 'date-fns';
 import {
   TalosDialogRef,
   TALOS_DIALOG_DATA,
   TalosDialogModule,
 } from '@daedal-dev/talos-ui/feedback/dialog';
 import { TalosButtonDirective } from '@daedal-dev/talos-ui/button/button';
-import { TalosFormFieldComponent } from '@daedal-dev/talos-ui/form/form-field';
-import { TalosInputDirective } from '@daedal-dev/talos-ui/form/input';
-import { TalosSlideToggleComponent } from '@daedal-dev/talos-ui/form/slide-toggle';
-import { SelectInputComponent, OptionComponent } from '@daedal-dev/talos-ui/form/select-input';
+import { TalosTooltipDirective } from '@daedal-dev/talos-ui/feedback/tooltip';
 import {
   CalendarEvent,
-  CalendarEventColor,
   CalendarDateSelectEvent,
 } from '../../models/calendar.types';
-import { LucideTrash2 } from '@lucide/angular';
+import { TalosAppointmentPreviewComponent } from './appointment-preview.component';
+import { TalosAppointmentFormComponent } from './appointment-form.component';
+import { LucideTrash2, LucidePencil } from '@lucide/angular';
+
+export type AppointmentDialogMode = 'create' | 'edit' | 'preview';
 
 export interface AppointmentDialogData {
   event?: CalendarEvent;
   dateSelection?: CalendarDateSelectEvent;
-  mode: 'create' | 'edit';
+  mode?: AppointmentDialogMode;
+  allowEdit?: boolean;
+  allowDelete?: boolean;
 }
 
 export type AppointmentDialogResult =
@@ -34,152 +42,123 @@ export type AppointmentDialogResult =
   selector: 'talos-appointment-dialog',
   imports: [
     CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
     TalosDialogModule,
     TalosButtonDirective,
-    TalosFormFieldComponent,
-    TalosInputDirective,
-    TalosSlideToggleComponent,
-    SelectInputComponent,
-    OptionComponent,
+    TalosTooltipDirective,
+    TalosAppointmentPreviewComponent,
+    TalosAppointmentFormComponent,
     LucideTrash2,
+    LucidePencil,
   ],
   templateUrl: './appointment-dialog.component.html',
   styleUrls: ['./appointment-dialog.component.scss'],
+  host: {
+    class: 'talos-appointment-dialog-host',
+    '[class.is-preview]': 'currentMode() === "preview"',
+    '[class.is-edit]': 'currentMode() === "edit"',
+    '[class.is-create]': 'currentMode() === "create"',
+  },
 })
 export class AppointmentDialogComponent {
-  private readonly dialogRef = inject<TalosDialogRef<AppointmentDialogResult, AppointmentDialogData>>(
-    TalosDialogRef
+  private readonly dialogRef = inject<
+    TalosDialogRef<AppointmentDialogResult, AppointmentDialogData>
+  >(TalosDialogRef, { optional: true });
+  readonly data = inject<AppointmentDialogData>(TALOS_DIALOG_DATA, { optional: true });
+
+  // Optional ViewChild to trigger form submission from dialog footer
+  readonly formComponent = viewChild<TalosAppointmentFormComponent>(TalosAppointmentFormComponent);
+
+  // Component inputs (for standalone embedded usage)
+  readonly eventInput = input<CalendarEvent | undefined>(undefined, { alias: 'event' });
+  readonly modeInput = input<AppointmentDialogMode | undefined>(undefined, { alias: 'mode' });
+  readonly allowEditInput = input<boolean>(true, { alias: 'allowEdit' });
+  readonly allowDeleteInput = input<boolean>(true, { alias: 'allowDelete' });
+
+  // Component outputs
+  readonly editClick = output<CalendarEvent>();
+  readonly save = output<CalendarEvent>();
+  readonly delete = output<string>();
+  readonly cancel = output<void>();
+
+  // Determine initial mode
+  private readonly initialMode: AppointmentDialogMode =
+    this.modeInput() ??
+    this.data?.mode ??
+    (this.data?.event || this.eventInput() ? 'preview' : 'create');
+
+  readonly currentMode = signal<AppointmentDialogMode>(this.initialMode);
+  readonly wasInitiallyPreview = signal<boolean>(this.initialMode === 'preview');
+
+  readonly activeEvent = computed<CalendarEvent | undefined>(
+    () => this.eventInput() ?? this.data?.event
   );
-  readonly data = inject<AppointmentDialogData>(TALOS_DIALOG_DATA);
-  private readonly fb = inject(FormBuilder);
 
-  readonly isEdit = this.data.mode === 'edit';
-  readonly colorOptions: { id: CalendarEventColor; label: string; hex: string }[] = [
-    { id: 'blue', label: 'Blue', hex: '#2563eb' },
-    { id: 'indigo', label: 'Indigo', hex: '#4f46e5' },
-    { id: 'purple', label: 'Purple', hex: '#9333ea' },
-    { id: 'pink', label: 'Pink', hex: '#db2777' },
-    { id: 'rose', label: 'Rose', hex: '#e11d48' },
-    { id: 'emerald', label: 'Emerald', hex: '#059669' },
-    { id: 'teal', label: 'Teal', hex: '#0d9488' },
-    { id: 'amber', label: 'Amber', hex: '#d97706' },
-    { id: 'orange', label: 'Orange', hex: '#ea580c' },
-    { id: 'cyan', label: 'Cyan', hex: '#0891b2' },
-  ];
-
-  readonly categories: string[] = [
-    'Work',
-    'Meeting',
-    'Conference',
-    'Personal',
-    'Client',
-    'Project',
-    'Review',
-  ];
-
-  selectedColor = signal<CalendarEventColor>(
-    this.data.event?.color ?? 'blue'
-  );
-
-  form = this.fb.group({
-    title: [this.data.event?.title ?? '', [Validators.required]],
-    startDate: [
-      format(
-        this.data.event?.start ?? this.data.dateSelection?.start ?? new Date(),
-        'yyyy-MM-dd'
-      ),
-      [Validators.required],
-    ],
-    startTime: [
-      format(
-        this.data.event?.start ?? this.data.dateSelection?.start ?? new Date(),
-        'HH:mm'
-      ),
-    ],
-    endDate: [
-      format(
-        this.data.event?.end ??
-          this.data.dateSelection?.end ??
-          addHours(new Date(), 1),
-        'yyyy-MM-dd'
-      ),
-      [Validators.required],
-    ],
-    endTime: [
-      format(
-        this.data.event?.end ??
-          this.data.dateSelection?.end ??
-          addHours(new Date(), 1),
-        'HH:mm'
-      ),
-    ],
-    allDay: [
-      this.data.event?.allDay ?? this.data.dateSelection?.allDay ?? false,
-    ],
-    category: [this.data.event?.category ?? 'Work'],
-    location: [this.data.event?.location ?? ''],
-    description: [this.data.event?.description ?? ''],
+  readonly canEdit = computed<boolean>(() => {
+    if (this.data?.allowEdit !== undefined) {
+      return this.data.allowEdit;
+    }
+    return this.allowEditInput();
   });
 
-  onSelectColor(color: CalendarEventColor) {
-    this.selectedColor.set(color);
+  readonly canDelete = computed<boolean>(() => {
+    const isAllowed =
+      this.data?.allowDelete !== undefined ? this.data.allowDelete : this.allowDeleteInput();
+    return isAllowed && !!this.activeEvent();
+  });
+
+  readonly isCreate = computed(() => this.currentMode() === 'create');
+  readonly isEdit = computed(() => this.currentMode() === 'edit');
+  readonly isPreview = computed(() => this.currentMode() === 'preview');
+
+  switchToEdit() {
+    this.currentMode.set('edit');
+    const evt = this.activeEvent();
+    if (evt) {
+      this.editClick.emit(evt);
+    }
   }
 
-  onSave() {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
-
-    const val = this.form.value;
-    const isAllDay = !!val.allDay;
-
-    let start: Date;
-    let end: Date;
-
-    if (isAllDay) {
-      start = parse(val.startDate!, 'yyyy-MM-dd', new Date());
-      end = parse(val.endDate!, 'yyyy-MM-dd', new Date());
-    } else {
-      start = parse(
-        `${val.startDate} ${val.startTime || '09:00'}`,
-        'yyyy-MM-dd HH:mm',
-        new Date()
-      );
-      end = parse(
-        `${val.endDate} ${val.endTime || '10:00'}`,
-        'yyyy-MM-dd HH:mm',
-        new Date()
-      );
-    }
-
-    if (!isValid(start)) start = new Date();
-    if (!isValid(end)) end = addHours(start, 1);
-
-    const savedEvent: CalendarEvent = {
-      id: this.data.event?.id ?? `event_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-      title: val.title!.trim(),
-      description: val.description?.trim() || undefined,
-      start,
-      end,
-      allDay: isAllDay,
-      color: this.selectedColor(),
-      category: val.category || undefined,
-      location: val.location?.trim() || undefined,
-    };
-
-    this.dialogRef.close({ action: this.isEdit ? 'update' : 'create', event: savedEvent });
+  switchToPreview() {
+    this.currentMode.set('preview');
   }
 
-  onDelete() {
-    if (this.data.event) {
-      this.dialogRef.close({ action: 'delete', eventId: this.data.event.id });
+  onSave(event: CalendarEvent) {
+    this.save.emit(event);
+    if (this.dialogRef) {
+      this.dialogRef.close({
+        action: this.isCreate() ? 'create' : 'update',
+        event,
+      });
+    }
+  }
+
+  onDelete(eventId: string) {
+    this.delete.emit(eventId);
+    if (this.dialogRef) {
+      this.dialogRef.close({ action: 'delete', eventId });
     }
   }
 
   onCancel() {
-    this.dialogRef.close();
+    if (this.isEdit() && this.wasInitiallyPreview()) {
+      this.switchToPreview();
+      return;
+    }
+
+    this.cancel.emit();
+    if (this.dialogRef) {
+      this.dialogRef.close();
+    }
+  }
+
+  submitForm() {
+    this.formComponent()?.onSave();
+  }
+
+  triggerDelete() {
+    const evt = this.activeEvent();
+    if (evt) {
+      this.onDelete(evt.id);
+    }
   }
 }

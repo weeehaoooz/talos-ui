@@ -14,6 +14,8 @@ import {
   LucideChevronRight,
   LucidePlus,
   LucideCalendar,
+  LucideMaximize2,
+  LucideMinimize2,
 } from '@lucide/angular';
 
 @Component({
@@ -25,6 +27,8 @@ import {
     LucideChevronRight,
     LucidePlus,
     LucideCalendar,
+    LucideMaximize2,
+    LucideMinimize2,
   ],
   templateUrl: './calendar-header.component.html',
   styleUrls: ['./calendar-header.component.scss'],
@@ -36,12 +40,15 @@ export class CalendarHeaderComponent {
   readonly currentDate = input.required<Date>();
   readonly view = input.required<CalendarViewMode>();
   readonly showNewEventButton = input<boolean>(true);
+  readonly fullscreen = input<boolean>(false);
+  readonly showFullscreenToggle = input<boolean>(true);
 
   readonly prev = output<void>();
   readonly next = output<void>();
   readonly today = output<void>();
   readonly viewChange = output<CalendarViewMode>();
   readonly newEvent = output<void>();
+  readonly fullscreenToggle = output<void>();
 
   readonly views: { id: CalendarViewMode; label: string }[] = [
     { id: 'month', label: 'Month' },
@@ -95,5 +102,9 @@ export class CalendarHeaderComponent {
 
   onNewEvent() {
     this.newEvent.emit();
+  }
+
+  onFullscreenToggle() {
+    this.fullscreenToggle.emit();
   }
 }

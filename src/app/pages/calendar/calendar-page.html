@@ -28,6 +28,74 @@
       }
     </div>
 
+    <!-- On-Click Mode Controls -->
+    <div class="click-config-bar">
+      <span class="filter-label">
+        <svg lucideSettings [size]="14"></svg>
+        <span>On Event Click:</span>
+      </span>
+      <div class="click-segmented-control" role="radiogroup" aria-label="Event Click Action">
+        @for (opt of eventClickActionOptions; track opt.id) {
+          <button
+            type="button"
+            class="config-btn"
+            [class.is-active]="eventClickAction() === opt.id"
+            [title]="opt.desc"
+            (click)="eventClickAction.set(opt.id)"
+          >
+            {{ opt.label }}
+          </button>
+        }
+      </div>
+
+      @if (eventClickAction() === 'preview') {
+        <button
+          type="button"
+          class="toggle-edit-btn"
+          [class.is-active]="allowEventEdit()"
+          (click)="allowEventEdit.update(v => !v)"
+          title="Toggle whether 'Edit Event' button is displayed in preview dialog"
+        >
+          <svg lucidePencil [size]="13"></svg>
+          <span>Allow Edit: {{ allowEventEdit() ? 'ON' : 'OFF' }}</span>
+        </button>
+      }
+    </div>
+
+    <!-- Sizing & Fullscreen Controls -->
+    <div class="size-and-fullscreen-bar">
+      <div class="size-segmented-control" role="radiogroup" aria-label="Calendar Size">
+        @for (opt of sizeOptions; track opt.id) {
+          <button
+            type="button"
+            class="size-btn"
+            [class.is-active]="calendarSize() === opt.id"
+            [title]="opt.desc"
+            (click)="onSizeChange(opt.id)"
+          >
+            {{ opt.label }}
+          </button>
+        }
+      </div>
+
+      <button
+        talosButton
+        variant="outline"
+        size="sm"
+        type="button"
+        (click)="toggleFullscreen()"
+        [title]="isFullscreen() ? 'Exit Full Screen (Esc)' : 'Enter Full Screen'"
+      >
+        @if (isFullscreen()) {
+          <svg lucideMinimize2 [size]="14"></svg>
+          <span>Exit Full Screen</span>
+        } @else {
+          <svg lucideMaximize2 [size]="14"></svg>
+          <span>Full Screen</span>
+        }
+      </button>
+    </div>
+
     <div class="stats-pills">
       <div class="stat-badge">
         <span class="stat-num">{{ totalEventsCount() }}</span>
@@ -44,6 +112,10 @@
   <div class="calendar-demo-card">
     <talos-calendar
       [events]="filteredEvents()"
+      [size]="calendarSize()"
+      [eventClickAction]="eventClickAction()"
+      [allowEventEdit]="allowEventEdit()"
+      [(fullscreen)]="isFullscreen"
       [(view)]="currentView"
       [(currentDate)]="activeDate"
       (eventClick)="onEventClick($event)"
@@ -66,6 +138,16 @@
       <div class="features-grid">
         <div class="feature-item">
           <div class="feature-icon blue">
+            <svg lucideEye [size]="20"></svg>
+          </div>
+          <div class="feature-info">
+            <h4>Preview & Edit Modes</h4>
+            <p>Polished event preview card extensible with custom &#60;ng-content&#62; slots, with configurable single-click transition into edit mode.</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon purple">
             <svg lucideCalendar [size]="20"></svg>
           </div>
           <div class="feature-info">
@@ -75,7 +157,7 @@
         </div>
 
         <div class="feature-item">
-          <div class="feature-icon purple">
+          <div class="feature-icon emerald">
             <svg lucideClock [size]="20"></svg>
           </div>
           <div class="feature-info">
@@ -85,22 +167,12 @@
         </div>
 
         <div class="feature-item">
-          <div class="feature-icon emerald">
+          <div class="feature-icon amber">
             <svg lucideSparkles [size]="20"></svg>
           </div>
           <div class="feature-info">
-            <h4>Signal-Based Reactivity</h4>
-            <p>Built exclusively on Angular Signals (inputs, models, computed state) for blazing fast zoneless rendering.</p>
-          </div>
-        </div>
-
-        <div class="feature-item">
-          <div class="feature-icon amber">
-            <svg lucideCheckCircle2 [size]="20"></svg>
-          </div>
-          <div class="feature-info">
-            <h4>Interactive Dialogs</h4>
-            <p>Integrated appointment creator & editor with color categories, date/time pickers, and all-day toggles.</p>
+            <h4>Configurable Event Click</h4>
+            <p>Configure event click actions to 'preview', 'edit', or 'none' with customizable permissions.</p>
           </div>
         </div>
       </div>

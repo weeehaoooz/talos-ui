@@ -3,6 +3,92 @@
 :host {
   display: block;
   width: 100%;
+  box-sizing: border-box;
+  position: relative;
+
+  &[style*="--talos-cal-custom-height"],
+  &.size-full {
+    height: var(--talos-cal-custom-height, 100%);
+    display: flex;
+    flex-direction: column;
+
+    .calendar-wrapper {
+      height: 100%;
+      flex: 1;
+    }
+
+    .calendar-view-container {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+
+      > * {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+      }
+    }
+  }
+
+  &.size-sm {
+    .calendar-wrapper {
+      border-radius: 0.5rem;
+    }
+  }
+
+  &.size-lg {
+    .calendar-wrapper {
+      border-radius: 1rem;
+    }
+  }
+
+  &.is-fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 10000;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 1rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    animation: talos-calendar-fade-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+    .calendar-wrapper {
+      height: 100%;
+      max-height: 100%;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      border-radius: var(--talos-cal-radius, 0.75rem);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px var(--talos-cal-border, #e2e8f0);
+    }
+
+    .calendar-view-container {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+
+      > * {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+      }
+    }
+  }
 }
 
 .calendar-wrapper {
@@ -18,4 +104,15 @@
 
 .calendar-view-container {
   width: 100%;
+}
+
+@keyframes talos-calendar-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

@@ -1,5 +1,9 @@
 export type CalendarViewMode = 'month' | 'week' | 'day' | 'agenda';
 
+export type CalendarSize = 'sm' | 'md' | 'lg' | 'full';
+
+export type CalendarEventClickAction = 'preview' | 'edit' | 'none';
+
 export type CalendarEventColor =
   | 'blue'
   | 'indigo'

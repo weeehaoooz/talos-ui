@@ -1,0 +1,108 @@
+<div class="preview-card" [style.--preview-accent]="eventColorHex()">
+  <!-- Hero / Header Accent Section -->
+  <div class="preview-hero-section">
+    <div class="preview-accent-indicator"></div>
+    <div class="preview-hero-content">
+      <div class="preview-meta-badges">
+        <span class="preview-color-badge">
+          <span class="color-dot" [style.background-color]="eventColorHex()"></span>
+          {{ eventColorLabel() }}
+        </span>
+        @if (event().category) {
+        <span class="preview-category-badge">
+          <svg lucideTag [size]="12" class="badge-icon"></svg>
+          {{ event().category }}
+        </span>
+        }
+        @if (event().allDay) {
+        <span class="preview-allday-badge">All-day</span>
+        }
+      </div>
+      <h2 class="preview-event-title">{{ event().title }}</h2>
+    </div>
+  </div>
+
+  <!-- Key Details List -->
+  <div class="preview-details-list">
+    <!-- Date Info -->
+    <div class="preview-detail-item">
+      <div class="detail-icon-wrapper">
+        <svg lucideCalendar [size]="16"></svg>
+      </div>
+      <div class="detail-content">
+        <span class="detail-label">Date</span>
+        <span class="detail-value">{{ formattedDateRange() }}</span>
+      </div>
+    </div>
+
+    <!-- Time Info (if not all-day) -->
+    @if (!event().allDay) {
+    <div class="preview-detail-item">
+      <div class="detail-icon-wrapper">
+        <svg lucideClock [size]="16"></svg>
+      </div>
+      <div class="detail-content">
+        <span class="detail-label">Time</span>
+        <span class="detail-value">{{ formattedTimeRange() }}</span>
+      </div>
+    </div>
+    }
+
+    <!-- Location (if present) -->
+    @if (event().location) {
+    <div class="preview-detail-item">
+      <div class="detail-icon-wrapper">
+        <svg lucideMapPin [size]="16"></svg>
+      </div>
+      <div class="detail-content">
+        <span class="detail-label">Location</span>
+        <span class="detail-value">{{ event().location }}</span>
+      </div>
+    </div>
+    }
+
+    <!-- Description (if present) -->
+    @if (event().description) {
+    <div class="preview-detail-item">
+      <div class="detail-icon-wrapper">
+        <svg lucideAlignLeft [size]="16"></svg>
+      </div>
+      <div class="detail-content">
+        <span class="detail-label">Description</span>
+        <p class="detail-description">{{ event().description }}</p>
+      </div>
+    </div>
+    }
+  </div>
+
+  <!-- Extension Slot via ng-content for custom developer projections -->
+  <div class="preview-extension-slot">
+    <ng-content select="[previewExtension], [previewContent], [dialogPreview]"></ng-content>
+    <ng-content></ng-content>
+  </div>
+
+  <!-- Optional Action Buttons (when used standalone) -->
+  @if (showActions()) {
+  <div class="preview-actions-bar">
+    @if (allowDelete()) {
+    <button talosButton variant="danger" [iconOnly]="true" type="button" talosTooltip="Delete Event"
+      aria-label="Delete Event" (click)="onDeleteClick()">
+      <svg lucideTrash2 [size]="16"></svg>
+    </button>
+    }
+
+    <div class="right-actions">
+      <button talosButton variant="outline" [iconOnly]="true" type="button" talosTooltip="Close" aria-label="Close"
+        (click)="onCloseClick()">
+        <svg lucideX [size]="16"></svg>
+      </button>
+      @if (allowEdit()) {
+      <button talosButton variant="primary" [iconOnly]="true" type="button" talosTooltip="Edit Event"
+        aria-label="Edit Event" (click)="onEditClick()">
+        <svg lucidePencil [size]="16"></svg>
+      </button>
+      }
+    </div>
+  </div>
+  }
+</div>

@@ -6,6 +6,46 @@
   background: var(--talos-cal-bg, #ffffff);
 }
 
+:host-context(.talos-calendar-root.is-fullscreen),
+:host-context(.talos-calendar-root.size-full) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+
+  .agenda-view-container {
+    height: 100%;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
+
+:host-context(.talos-calendar-root.size-sm) {
+  .agenda-view-container {
+    min-height: 320px;
+    padding: 0.75rem;
+  }
+
+  .agenda-event-row {
+    padding: 0.5rem 0.75rem;
+    gap: 0.75rem;
+  }
+}
+
+:host-context(.talos-calendar-root.size-lg) {
+  .agenda-view-container {
+    min-height: 600px;
+    padding: 1.75rem;
+  }
+
+  .agenda-event-row {
+    padding: 1rem 1.25rem;
+    gap: 1.25rem;
+  }
+}
+
 .agenda-view-container {
   display: flex;
   flex-direction: column;

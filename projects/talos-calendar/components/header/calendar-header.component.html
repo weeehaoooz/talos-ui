@@ -74,5 +74,24 @@
         <span>New Event</span>
       </button>
     }
+
+    @if (showFullscreenToggle()) {
+      <button
+        talosButton
+        variant="outline"
+        size="sm"
+        [iconOnly]="true"
+        type="button"
+        (click)="onFullscreenToggle()"
+        [title]="fullscreen() ? 'Exit Full Screen (Esc)' : 'Enter Full Screen'"
+        [attr.aria-label]="fullscreen() ? 'Exit Full Screen' : 'Enter Full Screen'"
+      >
+        @if (fullscreen()) {
+          <svg lucideMinimize2 [size]="15"></svg>
+        } @else {
+          <svg lucideMaximize2 [size]="15"></svg>
+        }
+      </button>
+    }
   </div>
 </div>

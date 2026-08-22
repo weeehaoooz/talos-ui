@@ -1,0 +1,134 @@
+<form [formGroup]="form" class="appointment-form">
+  <!-- Event Title -->
+  <talos-form-field label="Event Title" [required]="true">
+    <input
+      talosInput
+      formControlName="title"
+      placeholder="e.g. Design Sync, Annual Tech Summit..."
+      autofocus
+    />
+  </talos-form-field>
+
+  <!-- All-Day Toggle -->
+  <div class="toggle-row">
+    <talos-slide-toggle formControlName="allDay">
+      All-day or Multi-day Event
+    </talos-slide-toggle>
+  </div>
+
+  <!-- Date / Time Grid -->
+  <div class="datetime-grid">
+    @if (form.value.allDay) {
+      <talos-date-picker
+        label="Starts"
+        [required]="true"
+        formControlName="startDate"
+        placeholder="Select start date"
+      />
+      <talos-date-picker
+        label="Ends"
+        [required]="true"
+        formControlName="endDate"
+        placeholder="Select end date"
+      />
+    } @else {
+      <talos-date-time-picker
+        label="Starts"
+        [required]="true"
+        formControlName="startDateTime"
+        placeholder="Select start date & time"
+      />
+      <talos-date-time-picker
+        label="Ends"
+        [required]="true"
+        formControlName="endDateTime"
+        placeholder="Select end date & time"
+      />
+    }
+  </div>
+
+  <!-- Category & Color Picker -->
+  <div class="category-and-color-row">
+    <div class="category-field">
+      <talos-form-field label="Category">
+        <talos-select-input formControlName="category">
+          @for (cat of categories; track cat) {
+            <talos-option [value]="cat" [label]="cat">{{ cat }}</talos-option>
+          }
+        </talos-select-input>
+      </talos-form-field>
+    </div>
+
+    <div class="color-picker-group">
+      <span class="field-sublabel">Event Color</span>
+      <div class="color-swatches">
+        @for (color of colorOptions; track color.id) {
+          <button
+            type="button"
+            class="color-swatch"
+            [class.is-selected]="selectedColor() === color.id"
+            [style.background-color]="color.hex"
+            [title]="color.label"
+            (click)="onSelectColor(color.id)"
+          ></button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Location -->
+  <talos-form-field label="Location (Optional)">
+    <input
+      talosInput
+      formControlName="location"
+      placeholder="e.g. Conference Room A, Google Meet, City Hall..."
+    />
+  </talos-form-field>
+
+  <!-- Description -->
+  <talos-form-field label="Description (Optional)">
+    <textarea
+      talosInput
+      formControlName="description"
+      rows="3"
+      placeholder="Add details, agenda, notes, or links..."
+    ></textarea>
+  </talos-form-field>
+
+  <!-- Optional Action Buttons (when used standalone) -->
+  @if (showActions()) {
+    <div class="form-actions-bar">
+      @if (isEdit() && allowDelete()) {
+        <button
+          talosButton
+          variant="danger"
+          type="button"
+          (click)="onDelete()"
+        >
+          <svg lucideTrash2 [size]="15"></svg>
+          <span>Delete</span>
+        </button>
+      }
+
+      <div class="right-actions">
+        <button
+          talosButton
+          variant="outline"
+          type="button"
+          (click)="onCancel()"
+        >
+          Cancel
+        </button>
+        <button
+          talosButton
+          variant="primary"
+          type="button"
+          [disabled]="form.invalid"
+          (click)="onSave()"
+        >
+          {{ isEdit() ? 'Save Changes' : 'Create Event' }}
+        </button>
+      </div>
+    </div>
+  }
+</form>
